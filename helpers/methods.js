@@ -12,7 +12,6 @@ const createUser = async (req, res, next) => {
           if (err) {
             throw err;
           }
-
           userModel.create({userName: req.body.userName, password: hash, hobbies: req.body.hobbies});
           res.status(200).json({msg: "The user was succesfull created" });
       })
@@ -73,4 +72,24 @@ const deleteUser = async (req, res, next) => {
    }
 }
 
-module.exports = {createUser, loginUser, deleteUser};
+const changeHobbies = async (req, res, next) => {
+    try {
+
+      let decodedUser = await jwt.decode(req.cookies["authToken"], process.env.TOKEN_KEY);
+      let findDeleteUser = await userModel.findOne({userName: decodedUser.userName });
+      
+      if(findDeleteUser){
+        let findUpdateHobby = await userModel.findOneAndUpdate({hobbies: req.params.hobby}, req.body, {new: true});
+        res.status(200).json({msg: "The update was succesful"});
+      }
+      else{
+        res.status(200).json({msg: "The update was not correct"});
+      }
+
+
+    } catch (error) {
+      console.log(error);
+    }
+}
+
+module.exports = {createUser, loginUser, deleteUser, changeHobbies};

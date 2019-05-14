@@ -1,5 +1,5 @@
 const express = require("express");
-const {createUser, loginUser, deleteUser} = require("../helpers/methods");
+const {createUser, loginUser, deleteUser, changeHobbies} = require("../helpers/methods");
 const userRouter = express.Router();
 const { check, validationResult } = require('express-validator/check');
 const userModel = require("../models/userModel");
@@ -31,6 +31,7 @@ userRouter.post("/create", [
 
 userRouter.post("/login", loginUser);
 userRouter.delete("/delete", deleteUser);
+userRouter.put("/update/:hobby", changeHobbies);
 
 
 
