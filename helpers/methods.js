@@ -76,9 +76,9 @@ const changeHobbies = async (req, res, next) => {
     try {
 
       let decodedUser = await jwt.decode(req.cookies["authToken"], process.env.TOKEN_KEY);
-      let findDeleteUser = await userModel.findOne({userName: decodedUser.userName });
-      
-      if(findDeleteUser){
+      let findUser = await userModel.findOne({userName: decodedUser.userName });
+
+      if(findUser){
         let findUpdateHobby = await userModel.findOneAndUpdate({hobbies: req.params.hobby}, req.body, {new: true});
         res.status(200).json({msg: "The update was succesful"});
       }
