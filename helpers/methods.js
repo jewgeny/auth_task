@@ -6,15 +6,17 @@ const cookieparser = require('cookie-parser');
 const dotenv = require("dotenv").config();
 const validateUserCreate = require("../helpers/validateUserCreate");
 
+const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+  next();
+}
+
 
 const createUser = async (req, res, next) => {
     try {
-
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-      }
-
       await bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
           if (err) {
             throw err;
@@ -30,11 +32,7 @@ const createUser = async (req, res, next) => {
 
 const loginUser = async (req, res, next) => {
    try{
-     const errors = validationResult(req);
-     if (!errors.isEmpty()) {
-       return res.status(422).json({ errors: errors.array() });
-     }
-     
+
      let findUser = await userModel.findOne({userName: req.body.userName}, {_id: 0});
      console.log(findUser);
 
@@ -96,4 +94,4 @@ const changeHobbies = async (req, res, next) => {
     }
 }
 
-module.exports = {createUser, loginUser, deleteUser, changeHobbies};
+module.exports = {createUser, loginUser, deleteUser, changeHobbies, handleValidationErrors};

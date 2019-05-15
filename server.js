@@ -4,12 +4,14 @@ const port = 5000;
 const connectToDB = require("./helpers/connectToDB");
 const userRouter = require("./routes/userRouter");
 const cookieParser = require("cookie-parser");
+const errorHandler = require("./helpers/errors");
 
 connectToDB();
 
 // first step convert to json
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
+app.use(errorHandler);
 app.use(cookieParser());
 app.use("/users/", userRouter);
 app.listen(port);
