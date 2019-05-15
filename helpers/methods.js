@@ -4,10 +4,17 @@ const saltRounds = 10;
 const jwt = require("jsonwebtoken");
 const cookieparser = require('cookie-parser');
 const dotenv = require("dotenv").config();
+const validateUserCreate = require("../helpers/validateUserCreate");
 
 
 const createUser = async (req, res, next) => {
     try {
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
+
       await bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
           if (err) {
             throw err;
@@ -20,16 +27,6 @@ const createUser = async (req, res, next) => {
     }
 }
 
-// const getOneUser = async (req, res, next) => {
-//   try{
-//     const userPassword = await userModel.findOne({password: req.body.password});
-//     let token = await jwt.sign({ password: userPassword.password }, 'TOPSECRETPASSWORT');
-//     //res.status(404).json({message: `Username is already exist`});
-//   }
-//   catch(error){
-//     console.log(error);
-//   }
-// }
 
 const loginUser = async (req, res, next) => {
    try{
@@ -37,7 +34,7 @@ const loginUser = async (req, res, next) => {
      console.log(findUser);
 
        if(!findUser){
-          return res.status(400).json({msg: "The username is not correct"})
+          return res.status(404).json({msg: "The username is not correct"})
        }
 
       let comparePassword =  await bcrypt.compare(req.body.password, findUser.password);
@@ -57,6 +54,8 @@ const loginUser = async (req, res, next) => {
      console.log(error);
    }
 }
+
+
 
 const deleteUser = async (req, res, next) => {
    try {
