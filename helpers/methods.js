@@ -25,7 +25,7 @@ const createUser = async (req, res, next) => {
           res.status(200).json({msg: "The user was succesfull created" });
       })
     } catch (error) {
-      console.log(error);
+      next(error);
     }
 }
 
@@ -47,14 +47,15 @@ const loginUser = async (req, res, next) => {
       }
 
        //let inputToken = req.cookies.authToken;
-       const initialToken = jwt.sign({userName: findUser.userName}, process.env.TOKEN_KEY);
-       res.cookie("authToken", initialToken, {httpOnly: true});
+       const initialToken = jwt.sign({userName: findUser.userName}, process.env.TOKEN_KEY);//payload
+       const token = "Bearer" + initialToken; //Bearer => for recognized the token wich come from a cpecific website for example facebook, xing
+       res.cookie("authToken", token, {httpOnly: true}); //{httpOnly: true} => can not manipulated
        console.log(initialToken);
        res.status(200).json({msg: "The login was successfull!"})
 
    }
    catch(error){
-     console.log(error);
+     next(error);
    }
 }
 
@@ -63,35 +64,39 @@ const loginUser = async (req, res, next) => {
 const deleteUser = async (req, res, next) => {
    try {
 
-     let decodedUser = await jwt.decode(req.cookies["authToken"],  process.env.TOKEN_KEY);
+     let decodedUser = await jwt.decode(req.token,  process.env.TOKEN_KEY);
      let findDeleteUser = await userModel.findOneAndDelete({userName: decodedUser.userName });
 
      res.clearCookie("authToken");
      findDeleteUser ?  res.status(200).json({msg: "The user was deleted"}) : res.status(200).json({msg: "The is not exist"})
 
    } catch (error) {
-     console.log(error);
+     next(error);
    }
 }
 
 const changeHobbies = async (req, res, next) => {
     try {
 
-      let decodedUser = await jwt.decode(req.cookies["authToken"], process.env.TOKEN_KEY);
-      let findUser = await userModel.findOne({userName: decodedUser.userName });
+      let decodedUser = await jwt.decode(req.token, process.env.TOKEN_KEY);
+      await userModel.findOneAndUpdate({userName: decodedUser.userName}, {$push: {hobbies: req.body.hobbies}});
 
-      if(findUser){
-        let findUpdateHobby = await userModel.findOneAndUpdate({hobbies: req.params.hobby}, req.body, {new: true});
-        res.status(200).json({msg: "The update was succesful"});
-      }
-      else{
-        res.status(200).json({msg: "The update was not correct"});
-      }
-
+      res.status(200).json({msg: "The update was succesful"});
 
     } catch (error) {
-      console.log(error);
+    next(error);
     }
 }
 
-module.exports = {createUser, loginUser, deleteUser, changeHobbies, handleValidationErrors};
+const logOut = async (req, res, next) => {
+  try {
+
+    res.clearCookie("authToken");
+    res.status(200).json({msg: "You are succesfull logout"});
+
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = {createUser, loginUser, deleteUser, changeHobbies, handleValidationErrors, logOut};

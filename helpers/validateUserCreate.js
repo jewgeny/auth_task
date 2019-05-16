@@ -23,4 +23,11 @@ const validateUserCreate =  [
                 })
         ]
 
-module.exports = validateUserCreate;
+const validateHobbyRequest = [
+  check('hobbies')
+      .exists().withMessage("The hobbies field is mandatory")
+      .trim()
+      .escape(), //for the security (nobody put his own js script),
+      ]
+
+module.exports = {validateUserCreate, validateHobbyRequest};
